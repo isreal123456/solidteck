@@ -98,7 +98,6 @@ def inventory_view(request):
 
 
 
-# ---------- DASHBOARD VIEW ----------
 
 @login_required
 @user_passes_test(is_storekeeper)
