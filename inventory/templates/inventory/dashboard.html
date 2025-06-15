@@ -1,0 +1,64 @@
+{% extends "inventory_base.html" %}
+{% block title %}Inventory Dashboard{% endblock %}
+
+{% block content %}
+<h1 class="text-2xl font-bold mb-6">Inventory Dashboard</h1>
+
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="bg-blue-100 border-l-4 border-blue-500 p-4 rounded" >
+        <h2 class="text-lg font-semibold">Total Categories</h2>
+        <p class="text-3xl">{{ total_categories }}</p>
+    </div>
+    <div class="bg-blue-100 border-l-4 border-green-500 p-4 rounded">
+        <h2 class="text-lg font-semibold">Total Products</h2>
+        <p class="text-3xl">{{ total_products }}</p>
+    </div>
+    <div class="bg-blue-100 border-l-4 border-red-500 p-4 rounded">
+        <h2 class="text-lg font-semibold">Total Stock Quantity</h2>
+        <p class="text-3xl">{{ total_stock }}</p>
+    </div>
+</div>
+
+<h2 class="text-xl font-semibold mb-4">Low Stock Products (≤ 10)</h2>
+<table class="min-w-full table-auto mb-8 border border-gray-300">
+    <thead>
+        <tr class="bg-gray-100">
+            <th class="border px-4 py-2">Product Name</th>
+            <th class="border px-4 py-2">Category</th>
+            <th class="border px-4 py-2">Stock Quantity</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in low_stock_products %}
+        <tr>
+            <td class="border px-4 py-2">{{ product.name }}</td>
+            <td class="border px-4 py-2">{{ product.category.name }}</td>
+            <td class="border px-4 py-2 text-red-600 font-bold">{{ product.stock }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3" class="border px-4 py-2 text-center">No products with low stock.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<h2 class="text-xl font-semibold mb-4">Recent Products</h2>
+<ul class="list-disc pl-5 mb-8">
+    {% for product in recent_products %}
+        <li>{{ product.name }} (Added on {{ product.created_at|date:"M d, Y" }})</li>
+    {% empty %}
+        <li>No recent products found.</li>
+    {% endfor %}
+</ul>
+
+<h2 class="text-xl font-semibold mb-4">Recent Categories</h2>
+<ul class="list-disc pl-5">
+    {% for category in recent_categories %}
+        <li>{{ category.name }} (Added on {{ category.created_at|date:"M d, Y" }})</li>
+    {% empty %}
+        <li>No recent categories found.</li>
+    {% endfor %}
+</ul>
+
+{% endblock %}

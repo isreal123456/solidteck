@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block title %}Order List{% endblock %}
+
+{% block extra_head %}
+
+{% endblock %}
+
+{% block content %}
+<style>
+    .filter-form {
+        background-color: #f8f9fa;
+        border-radius: 12px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1.5rem;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+        align-items: end;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    }
+
+    .filter-form .form-group {
+        flex: 1;
+        min-width: 180px;
+    }
+
+    .filter-form label {
+        font-size: 0.875rem;
+        color: #495057;
+        margin-bottom: 0.25rem;
+        display: block;
+    }
+
+    .filter-form input {
+        font-size: 0.9rem;
+        border: 1px solid #ced4da;
+        border-radius: 8px;
+        padding: 0.45rem 0.75rem;
+        width: 100%;
+        transition: border-color 0.2s ease-in-out;
+    }
+
+    .filter-form input:focus {
+        border-color: #80bdff;
+        outline: none;
+        box-shadow: 0 0 0 0.15rem rgba(0, 123, 255, 0.25);
+    }
+
+    .filter-form .filter-btn {
+        background-color: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        padding: 0.5rem 1.2rem;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .filter-form .filter-btn:hover {
+        background-color: #0056b3;
+    }
+
+    @media (max-width: 576px) {
+        .filter-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
+</style>
+
+<div class="order-list-container">
+    <h3 class="mb-4 fw-bold">
+        📝 Order List
+    </h3>
+<!-- Filter Form -->
+    <form method="get" class="filter-form">
+        <div class="form-group">
+            <label for="customer">Customer Name</label>
+            <input type="text" id="customer" name="customer" class="form-control"
+                   value="{{ request.GET.customer }}">
+        </div>
+        <div class="form-group">
+            <label for="start_date">From Date</label>
+            <input type="date" id="start_date" name="start_date" class="form-control"
+                   value="{{ request.GET.start_date }}">
+        </div>
+        <div class="form-group">
+            <label for="end_date">To Date</label>
+            <input type="date" id="end_date" name="end_date" class="form-control"
+                   value="{{ request.GET.end_date }}">
+        </div>
+        <div class="form-group">
+            <button type="submit" class="filter-btn">🔍 Filter</button>
+        </div>
+    </form>
+
+    {% if orders %}
+    <div class="list-group">
+        {% for order in orders %}
+            <a href="{% url 'detail' order.id %}" class="list-group-item list-group-item-action">
+
+                        <strong class="order-id">{{ order.id }}</strong> – {{ order.customer_name }}
+
+
+                        {{ order.created_at|date:"M d, Y H:i" }}
+
+            </a>
+        {% endfor %}
+        </div>
+    {% else %}
+        <div class="no-orders">
+            No orders found.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

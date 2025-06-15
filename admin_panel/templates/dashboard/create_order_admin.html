@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Order{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h2 class="mb-4 text-center">🧾 Create New Order</h2>
+
+            <form method="post" novalidate>
+                {% csrf_token %}
+                {{ form.as_p }}
+
+                <hr class="my-4">
+                <h4 class="mb-3">Order Items</h4>
+
+                {% if formset.non_form_errors %}
+                    <div class="alert alert-danger">
+                        {{ formset.non_form_errors }}
+                    </div>
+                {% endif %}
+
+                {{ formset.management_form }}
+
+                <table id="order-items-table" class="table table-bordered align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th style="width: 80px;">Remove</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for form in formset %}
+                            <tr class="order-item-form">
+                                <td>{{ form.product }}</td>
+                                <td>{{ form.quantity }}</td>
+                                <td class="text-center">
+                                    <button type="button" class="btn btn-sm btn-outline-danger remove-form">×</button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <div class="d-flex justify-content-between mt-4">
+                    <button type="button" id="add-form" class="btn btn-secondary">+ Add Item</button>
+                    <button type="submit" class="btn btn-primary">Submit Order</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const addFormButton = document.getElementById('add-form');
+    const formsetPrefix = '{{ formset.prefix }}';
+    const totalForms = document.getElementById('id_' + formsetPrefix + '-TOTAL_FORMS');
+    let formIdx = parseInt(totalForms.value);
+
+    addFormButton.addEventListener('click', function () {
+        const tableBody = document.querySelector('#order-items-table tbody');
+        const lastForm = document.querySelector('.order-item-form:last-child');
+        const newRow = lastForm.cloneNode(true);
+
+        newRow.querySelectorAll('input, select').forEach(input => {
+            const oldName = input.name;
+            const newName = oldName.replace(/-\d+-/, `-${formIdx}-`);
+            const newId = 'id_' + newName;
+            input.name = newName;
+            input.id = newId;
+
+            if (input.tagName === 'INPUT') input.value = '';
+            if (input.tagName === 'SELECT') input.selectedIndex = 0;
+        });
+
+        newRow.querySelectorAll('.errorlist').forEach(el => el.remove());
+
+        tableBody.appendChild(newRow);
+        updateTotalForms(1);
+        addRemoveButtonListener(newRow.querySelector('.remove-form'));
+    });
+
+    function updateTotalForms(change) {
+        formIdx += change;
+        totalForms.value = formIdx;
+    }
+
+    function addRemoveButtonListener(button) {
+        button.addEventListener('click', function () {
+            const row = button.closest('tr');
+            row.remove();
+            updateTotalForms(-1);
+
+            if (document.querySelectorAll('.order-item-form').length === 0) {
+                addFormButton.click(); // Ensure at least one form
+            }
+        });
+    }
+
+    document.querySelectorAll('.remove-form').forEach(btn => {
+        addRemoveButtonListener(btn);
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Admin Report{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-6 text-center text-gray-800">📊 Admin Report</h2>
+
+<form method="get" class="bg-white p-6 rounded-lg shadow-md grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
+    <input type="text" name="name" placeholder="Product Name" value="{{ request.GET.name }}" class="border p-2 rounded w-full" />
+
+    <input type="number" name="min_stock" placeholder="Min Stock" value="{{ request.GET.min_stock }}" class="border p-2 rounded w-full" />
+    <input type="number" name="max_stock" placeholder="Max Stock" value="{{ request.GET.max_stock }}" class="border p-2 rounded w-full" />
+
+    <input type="number" name="min_sold" placeholder="Min Sold" value="{{ request.GET.min_sold }}" class="border p-2 rounded w-full" />
+    <input type="number" name="max_sold" placeholder="Max Sold" value="{{ request.GET.max_sold }}" class="border p-2 rounded w-full" />
+
+    <input type="date" name="start_date" value="{{ request.GET.start_date }}" class="border p-2 rounded w-full" />
+    <input type="date" name="end_date" value="{{ request.GET.end_date }}" class="border p-2 rounded w-full" />
+
+    <div class="flex gap-2 mt-1 md:col-span-2 lg:col-span-3">
+        <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition">🔍 Filter</button>
+        <a href="{% url 'export_admin_report_excel' %}?{{ request.GET.urlencode }}" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition">📥 Excel</a>
+        <a href="{% url 'export_admin_report_pdf' %}?{{ request.GET.urlencode }}" class="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition">📄 PDF</a>
+    </div>
+</form>
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <div class="bg-white p-4 rounded shadow">
+        <h3 class="text-lg font-semibold mb-2 text-gray-700">Total Sold per Product</h3>
+        <canvas id="salesChart"></canvas>
+    </div>
+    <div class="bg-white p-4 rounded shadow">
+        <h3 class="text-lg font-semibold mb-2 text-gray-700">Stock Level per Product</h3>
+        <canvas id="stockChart"></canvas>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const productLabels = {{ product_labels|safe }};
+    const salesData = {{ product_sales_data|safe }};
+    const stockData = {{ product_stock_data|safe }};
+
+    new Chart(document.getElementById('salesChart'), {
+        type: 'bar',
+        data: {
+            labels: productLabels,
+            datasets: [{
+                label: 'Total Sold',
+                data: salesData,
+                backgroundColor: '#3b82f6',
+                borderRadius: 5,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+
+    new Chart(document.getElementById('stockChart'), {
+        type: 'bar',
+        data: {
+            labels: productLabels,
+            datasets: [{
+                label: 'Stock Level',
+                data: stockData,
+                backgroundColor: '#10b981',
+                borderRadius: 5,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { display: false }
+            }
+        }
+    });
+</script>
+{% endblock %}

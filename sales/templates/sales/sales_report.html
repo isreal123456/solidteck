@@ -1,0 +1,80 @@
+{% extends 'sale_base.html' %}
+
+{% load humanize %}
+
+{% block content %}
+<div class="p-4">
+    <h1 class="text-2xl font-bold mb-4">Sales Report</h1>
+
+    <!-- Filters -->
+    <form method="get" class="mb-6 flex flex-wrap items-end gap-4">
+        <div>
+            <label for="start_date" class="block text-sm font-medium">Start Date</label>
+            <input type="date" id="start_date" name="start_date" value="{{ request.GET.start_date }}" class="border p-2 rounded w-full">
+        </div>
+
+        <div>
+            <label for="end_date" class="block text-sm font-medium">End Date</label>
+            <input type="date" id="end_date" name="end_date" value="{{ request.GET.end_date }}" class="border p-2 rounded w-full">
+        </div>
+
+        <div>
+            <label for="user" class="block text-sm font-medium">User</label>
+            <select name="user" id="user" class="border p-2 rounded w-full">
+                <option value="">All Users</option>
+                {% for user in users %}
+                    <option value="{{ user.id }}" {% if request.GET.user == user.id|stringformat:"s" %}selected{% endif %}>
+                        {{ user.username }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded mt-1">
+                Filter
+            </button>
+        </div>
+    </form>
+
+    <!-- Export Buttons -->
+    <div class="flex gap-4 mb-6">
+        <a href="{% url 'export_sales_excel' %}?start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}&user={{ request.GET.user }}" class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded">
+            Export to Excel
+        </a>
+        <a href="{% url 'export_sales_pdf' %}?start_date={{ request.GET.start_date }}&end_date={{ request.GET.end_date }}&user={{ request.GET.user }}" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded">
+            Export to PDF
+        </a>
+    </div>
+
+    <!-- Summary -->
+    <div class="mb-6 space-y-1">
+        <h3 class="text-lg font-semibold">Total Orders: <span class="font-normal">{{ total_orders }}</span></h3>
+        <h3 class="text-lg font-semibold">Total Revenue: <span class="font-normal">₦{{ total_revenue|floatformat:2|intcomma }}</span></h3>
+    </div>
+
+    <!-- Sales Table -->
+    <div class="overflow-x-auto">
+        <table class="min-w-full border border-collapse shadow">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="border p-3 text-left">Date</th>
+                    <th class="border p-3 text-left">Revenue</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for day in daily_sales %}
+                    <tr class="hover:bg-gray-50">
+                        <td class="border p-2">{{ day.date }}</td>
+                        <td class="border p-2">₦{{ day.revenue|floatformat:2|intcomma }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="2" class="border p-3 text-center text-gray-500">No sales data available for selected filters.</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

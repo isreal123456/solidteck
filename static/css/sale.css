@@ -1,0 +1,68 @@
+/* Global box-sizing for easier sizing */
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    padding-top: 56px; /* Match navbar height */
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Sidebar */
+.sidebar {
+    height: calc(100vh - 56px); /* Full viewport height minus navbar */
+    width: 190px;
+    background-color: #bdc9d9;
+    padding: 20px;
+    position: fixed;
+    top: 56px; /* align with Bootstrap navbar height */
+    left: 0;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+/* Main content */
+.content {
+    margin-left: 190px; /* match sidebar width */
+    padding: 20px;
+}
+
+/* Nav link style */
+.nav-link {
+    font-weight: 500;
+    color: #333;
+    padding: 8px 12px;
+    display: block;
+    transition: background-color 0.2s ease;
+    text-decoration: none;
+}
+
+.nav-link:hover,
+.nav-link.active {
+    background-color: #3a638e;
+    border-radius: 5px;
+    color: white;
+}
+
+/* Button wrapper - changed from #button to .button-wrapper to avoid ID conflicts */
+.button-wrapper {
+    display: flex;
+    align-items: center;
+}
+
+/* Responsive fix for smaller screens */
+@media (max-width: 768px) {
+    .sidebar {
+        position: relative;
+        width: 40%;
+        height: auto;
+        top: 0;
+    }
+
+    .content {
+        margin-left: 0;
+    }
+}

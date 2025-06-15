@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Admin{% endblock title %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
+
+    {% block head %}{% endblock head %}
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f6f8;
+            color: #333;
+        }
+
+        .layout {
+            display: flex;
+            height: 100vh;
+        }
+
+        .sidebar {
+            width: 220px;
+            background-color: #1f2937;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            transition: transform 0.3s ease;
+        }
+
+        .sidebar h2 {
+            margin-bottom: 30px;
+            font-size: 1.2rem;
+            text-align: center;
+            color: #60a5fa;
+        }
+
+        .sidebar a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #e5e7eb;
+            text-decoration: none;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .sidebar a:hover,
+        .sidebar a.active {
+            background-color: #374151;
+        }
+
+        .main {
+            flex: 1;
+            overflow-y: auto;
+            padding: 30px;
+            font-size: 1rem;
+        }
+
+        .toggle-btn {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 26px;
+            color: #ffffff;
+            background-color: #1f2937;
+            padding: 8px 12px;
+            border-radius: 5px;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 101;
+            cursor: pointer;
+        }
+
+        .overlay {
+            display: none;
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+        }
+
+        @media (max-width: 768px) {
+            .layout {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100%;
+                transform: translateX(-100%);
+                z-index: 102;
+                box-shadow: 2px 0 8px rgba(0, 0, 0, 0.2);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+            }
+
+            .toggle-btn {
+                display: block;
+            }
+
+            .overlay.show {
+                display: block;
+            }
+
+            .main {
+                padding: 70px 20px 20px 20px;
+                font-size: 0.85rem;
+            }
+        }
+
+        .collapse-toggle {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            width: 100%;
+            background: none;
+            border: none;
+            color: #e5e7eb;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            margin-bottom: 6px;
+        }
+
+        .collapse-toggle:hover {
+            background-color: #374151;
+        }
+
+        .submenu {
+            display: none;
+            flex-direction: column;
+            margin-left: 20px;
+            margin-bottom: 10px;
+        }
+
+        .submenu a {
+            padding: 8px 10px;
+            font-size: 0.8rem;
+            color: #d1d5db;
+        }
+
+        .submenu a:hover,
+        .submenu a.active {
+            background-color: #4b5563;
+            border-radius: 6px;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            color: #9ca3af;
+            margin: 16px 8px 6px;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Mobile Header -->
+<!--    <header class="md:hidden bg-white shadow px-4 py-2 flex justify-between items-center sticky top-0 z-50">-->
+<!--        <h1 class="text-xl font-bold text-gray-800">Admin Panel</h1>-->
+        <button class="toggle-btn" onclick="toggleSidebar()">☰</button>
+<!--    </header>-->
+
+    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+    <div class="layout">
+        <!-- Sidebar -->
+        <nav class="sidebar" id="sidebar">
+            <h2>Admin Panel</h2>
+
+            <a href="{% url 'admin_dashboard' %}" class="{% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}">
+                <i class="fas fa-home"></i> Dashboard
+            </a>
+
+            <a href="{% url 'inventory_view_admin' %}" class="{% if request.resolver_match.url_name == 'inventory_view_admin' %}active{% endif %}">
+                <i class="fas fa-boxes"></i> Inventory
+            </a>
+
+            <!-- Products Collapsible -->
+            <button class="collapse-toggle" onclick="toggleSubmenu('productSubmenu')">
+                <i class="fas fa-box"></i> Products
+                <i class="fas fa-caret-down ml-auto submenu-icon" id="productSubmenuIcon"></i>
+            </button>
+            <div class="submenu" id="productSubmenu">
+                <a href="{% url 'create_category_admin' %}" class="{% if request.resolver_match.url_name == 'create_category_admin' %}active{% endif %}">
+                    <i class="fas fa-folder-plus"></i> Create Category
+                </a>
+                <a href="{% url 'create_product_admin' %}" class="{% if request.resolver_match.url_name == 'create_product_admin' %}active{% endif %}">
+                    <i class="fas fa-plus-circle"></i> Create Product
+                </a>
+            </div>
+
+            <!-- Orders Collapsible -->
+            <button class="collapse-toggle" onclick="toggleSubmenu('orderSubmenu')">
+                <i class="fas fa-shopping-cart"></i> Orders
+                <i class="fas fa-caret-down ml-auto submenu-icon" id="orderSubmenuIcon"></i>
+            </button>
+            <div class="submenu" id="orderSubmenu">
+                <a href="{% url 'create_order_admin' %}" class="{% if request.resolver_match.url_name == 'create_order_admin' %}active{% endif %}">
+                    <i class="fas fa-cart-plus"></i> Create Order
+                </a>
+                <a href="{% url 'list' %}" class="{% if request.resolver_match.url_name == 'list' %}active{% endif %}">
+                    <i class="fas fa-clipboard-list"></i> All Orders
+                </a>
+            </div>
+
+            <a href="{% url 'log_list' %}" class="{% if request.resolver_match.url_name == 'log_list' %}active{% endif %}">
+                <i class="fas fa-clipboard-list"></i> Logs
+            </a>
+
+            <a href="{% url 'admin_report' %}" class="{% if request.resolver_match.url_name == 'admin_report' %}active{% endif %}">
+                <i class="fas fa-chart-line"></i> Reports
+            </a>
+
+            <a href="{% url 'signup' %}" class="{% if request.resolver_match.url_name == 'signup' %}active{% endif %}">
+                <i class="fas fa-user-plus"></i> Register User
+            </a>
+
+            <a href="{% url 'logout' %}">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="main">
+            {% block content %}{% endblock content %}
+        </main>
+    </div>
+
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            const overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        }
+
+        function toggleSubmenu(id) {
+            const submenu = document.getElementById(id);
+            const icon = document.getElementById(id + 'Icon');
+            submenu.style.display = submenu.style.display === 'flex' ? 'none' : 'flex';
+            icon.classList.toggle('fa-caret-down');
+            icon.classList.toggle('fa-caret-up');
+        }
+    </script>
+
+    {% block scripts %}{% endblock scripts %}
+</body>
+</html>
